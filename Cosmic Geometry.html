@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Geometry</title>
+    <style>
+        body { margin: 0; color: white; background-color: #000; font-family: 'Segoe UI', sans-serif; overflow-x: hidden; }
+        #bg { position: fixed; top: 0; left: 0; z-index: -1; }
+        main { position: absolute; width: 100%; z-index: 1; }
+        .section { height: 100vh; display: flex; flex-direction: column; justify-content: center; padding: 0 10%; pointer-events: none; }
+        h1 { font-size: 5rem; margin: 0; text-transform: uppercase; letter-spacing: 5px; text-align: center; width: 100%; }
+    </style>
+</head>
+<body>
+
+    <canvas id="bg"></canvas>
+
+    <main>
+        <section class="section">
+            <h1>Cosmic Geometry</h1>
+        </section>
+        <section class="section"></section>
+        <section class="section"></section>
+        <section class="section"></section>
+        <section class="section"></section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: document.querySelector('#bg'), 
+            antialias: true 
+        });
+
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        camera.position.setZ(35);
+
+        const light = new THREE.PointLight(0xffffff, 2.5);
+        light.position.set(20, 20, 20);
+        const ambient = new THREE.AmbientLight(0xffffff, 1);
+        scene.add(light, ambient);
+
+        function addStar() {
+            const geometry = new THREE.SphereGeometry(0.15, 12, 12);
+            const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+            const star = new THREE.Mesh(geometry, material);
+            const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(200));
+            star.position.set(x, y, z);
+            scene.add(star);
+        }
+        Array(400).fill().map(addStar);
+
+        const objects = [];
+
+        const obj1 = new THREE.Mesh(new THREE.SphereGeometry(7, 32, 32), new THREE.MeshPhongMaterial({ color: 0xffaa00 }));
+        obj1.position.set(12, 0, 0);
+
+        const obj2 = new THREE.Mesh(new THREE.BoxGeometry(8, 8, 8), new THREE.MeshPhongMaterial({ color: 0x00ff88, wireframe: true }));
+        obj2.position.set(-12, -40, -5);
+
+        const obj3 = new THREE.Mesh(new THREE.TorusGeometry(6, 2, 16, 100), new THREE.MeshPhongMaterial({ color: 0xff0055 }));
+        obj3.position.set(12, -80, -5);
+
+        const obj4 = new THREE.Mesh(new THREE.ConeGeometry(7, 12, 32), new THREE.MeshPhongMaterial({ color: 0x00aaff }));
+        obj4.position.set(-10, -120, 0);
+
+        scene.add(obj1, obj2, obj3, obj4);
+        objects.push(obj1, obj2, obj3, obj4);
+
+        function moveCamera() {
+            const t = document.body.getBoundingClientRect().top;
+            camera.position.y = t * 0.1; 
+            camera.rotation.y = t * 0.0002;
+        }
+        window.addEventListener('scroll', moveCamera);
+ 
+        function animate() {
+            requestAnimationFrame(animate);
+            objects.forEach(obj => {
+                obj.rotation.x += 0.005;
+                obj.rotation.y += 0.008;
+                obj.position.y += Math.sin(Date.now() * 0.001) * 0.005;
+            });
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html> 
